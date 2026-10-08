@@ -19,8 +19,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, attributes })
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="relative mb-8 overflow-hidden rounded-3xl bg-[#7c3aed] text-white shadow-lg p-7 sm:p-10">
-      {/* Decorative radial circles from Variation 3 */}
+    <div className="relative mb-8 overflow-hidden rounded-3xl bg-[#2563eb] text-white shadow-lg p-7 sm:p-10">
+      {/* Decorative radial circles */}
       <div className="absolute -top-12 -right-12 w-56 h-56 rounded-full bg-white/10 pointer-events-none blur-sm" />
       <div className="absolute -bottom-16 right-1/3 w-64 h-64 rounded-full bg-black/10 pointer-events-none" />
 

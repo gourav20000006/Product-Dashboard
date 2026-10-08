@@ -4,7 +4,6 @@ import {
   Link as LinkIcon,
   Upload,
   X,
-  Sparkles,
   Play,
   CheckCircle2,
 } from 'lucide-react';
@@ -102,7 +101,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h4 className="mono">Product Lookup</h4>
-          <span className="text-[0.65rem] font-mono text-[#7c3aed] bg-[#f5f3ff] px-2 py-0.5 rounded-full font-semibold">
+          <span className="text-[0.65rem] font-mono text-[#2563eb] bg-[#eff6ff] px-2 py-0.5 rounded-full font-semibold">
             Ready
           </span>
         </div>
@@ -118,7 +117,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 : 'text-[#666] hover:text-[#1a1a1a]'
             }`}
           >
-            <Search className="w-3 h-3 text-[#7c3aed]" />
+            <Search className="w-3 h-3 text-[#2563eb]" />
             <span>Keyword</span>
           </button>
           <button
@@ -130,7 +129,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 : 'text-[#666] hover:text-[#1a1a1a]'
             }`}
           >
-            <LinkIcon className="w-3 h-3 text-[#7c3aed]" />
+            <LinkIcon className="w-3 h-3 text-[#2563eb]" />
             <span>Link URL</span>
           </button>
           <button
@@ -142,7 +141,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 : 'text-[#666] hover:text-[#1a1a1a]'
             }`}
           >
-            <Upload className="w-3 h-3 text-[#7c3aed]" />
+            <Upload className="w-3 h-3 text-[#2563eb]" />
             <span>Photo</span>
           </button>
         </div>
@@ -156,7 +155,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 value={keywordInput}
                 onChange={(e) => setKeywordInput(e.target.value)}
                 placeholder="Start your search..."
-                className="w-full px-5 py-3.5 rounded-xl border-[1.5px] border-[#eee] font-newsreader text-xl text-[#1a1a1a] outline-none bg-[#f8f6f2] focus:border-[#7c3aed] focus:bg-white transition-all shadow-2xs"
+                className="w-full px-5 py-3.5 rounded-xl border-[1.5px] border-[#eee] font-newsreader text-xl text-[#1a1a1a] outline-none bg-[#f8f6f2] focus:border-[#2563eb] focus:bg-white transition-all shadow-2xs"
               />
               {keywordInput && (
                 <button
@@ -177,7 +176,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 value={urlInput}
                 onChange={(e) => setUrlInput(e.target.value)}
                 placeholder="https://brand.com/products/..."
-                className="w-full px-5 py-3.5 rounded-xl border-[1.5px] border-[#eee] font-mono text-xs text-[#1a1a1a] outline-none bg-[#f8f6f2] focus:border-[#7c3aed] focus:bg-white transition-all shadow-2xs"
+                className="w-full px-5 py-3.5 rounded-xl border-[1.5px] border-[#eee] font-mono text-xs text-[#1a1a1a] outline-none bg-[#f8f6f2] focus:border-[#2563eb] focus:bg-white transition-all shadow-2xs"
               />
               {urlInput && (
                 <button
@@ -219,9 +218,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full py-7 border-2 border-dashed border-[#ddd] hover:border-[#7c3aed] rounded-xl text-center flex flex-col items-center justify-center gap-1.5 cursor-pointer transition bg-[#f8f6f2] hover:bg-white"
+                  className="w-full py-7 border-2 border-dashed border-[#ddd] hover:border-[#2563eb] rounded-xl text-center flex flex-col items-center justify-center gap-1.5 cursor-pointer transition bg-[#f8f6f2] hover:bg-white"
                 >
-                  <Upload className="w-5 h-5 text-[#7c3aed]" />
+                  <Upload className="w-5 h-5 text-[#2563eb]" />
                   <span className="text-xs font-mono text-[#1a1a1a] font-semibold">
                     Upload Product Image
                   </span>
@@ -233,11 +232,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
           )}
 
-          {/* Primary CTA button styled per Variation 3 */}
+          {/* Primary CTA button */}
           <button
             type="submit"
             disabled={isLoading}
-            className="btn btn-primary w-full justify-center py-4 rounded-full text-sm font-semibold tracking-wide cursor-pointer disabled:opacity-50 shadow-md hover:bg-[#7c3aed] transition-colors"
+            className="btn btn-primary w-full justify-center py-4 rounded-full text-sm font-semibold tracking-wide cursor-pointer disabled:opacity-50 shadow-md hover:bg-[#2563eb] transition-colors"
           >
             {isLoading ? (
               <>
@@ -254,7 +253,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </form>
       </div>
 
-      {/* 2. Popular Niches Presets from Variation 3 */}
+      {/* 2. Popular Niches Presets */}
       <div className="space-y-3">
         <h4 className="mono">Popular Niches</h4>
         <div className="grid grid-cols-2 gap-3">
@@ -262,7 +261,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div
               key={preset.query}
               onClick={() => handlePresetSelect(preset)}
-              className="p-3.5 rounded-xl bg-[#f8f6f2] hover:bg-white border border-transparent hover:border-[#7c3aed] cursor-pointer transition-all shadow-2xs hover:shadow-sm group"
+              className="p-3.5 rounded-xl bg-[#f8f6f2] hover:bg-white border border-transparent hover:border-[#2563eb] cursor-pointer transition-all shadow-2xs hover:shadow-sm group"
             >
               <div className="flex items-center gap-1.5 mb-1">
                 <span className="text-sm group-hover:scale-110 transition-transform">
@@ -272,7 +271,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {preset.label}
                 </strong>
               </div>
-              <span className="mono text-[0.6rem] text-[#7c3aed] group-hover:text-[#7c3aed]">
+              <span className="mono text-[0.6rem] text-[#2563eb] group-hover:text-[#2563eb]">
                 {preset.category}
               </span>
             </div>
@@ -280,7 +279,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      {/* 3. Active Nodes from Variation 3 */}
+      {/* 3. Active Nodes */}
       <div className="space-y-3">
         <h4 className="mono">Active Discovery Nodes</h4>
         <div className="flex flex-col gap-2.5">
@@ -293,7 +292,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <span className={`w-2 h-2 rounded-full ${includeReels ? 'bg-pink-500' : 'bg-gray-300'}`}></span>
               Reels Detection (20+)
             </span>
-            <span className={`text-[0.65rem] font-bold ${includeReels ? 'text-[#7c3aed]' : 'text-gray-400'}`}>
+            <span className={`text-[0.65rem] font-bold ${includeReels ? 'text-[#2563eb]' : 'text-gray-400'}`}>
               {includeReels ? 'ON' : 'OFF'}
             </span>
           </button>
@@ -307,7 +306,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <span className={`w-2 h-2 rounded-full ${includeMeta ? 'bg-blue-600' : 'bg-gray-300'}`}></span>
               Meta Ads Library (20+)
             </span>
-            <span className={`text-[0.65rem] font-bold ${includeMeta ? 'text-[#7c3aed]' : 'text-gray-400'}`}>
+            <span className={`text-[0.65rem] font-bold ${includeMeta ? 'text-[#2563eb]' : 'text-gray-400'}`}>
               {includeMeta ? 'ON' : 'OFF'}
             </span>
           </button>
@@ -321,7 +320,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <span className={`w-2 h-2 rounded-full ${includeTikTok ? 'bg-teal-500' : 'bg-gray-300'}`}></span>
               TikTok Center
             </span>
-            <span className={`text-[0.65rem] font-bold ${includeTikTok ? 'text-[#7c3aed]' : 'text-gray-400'}`}>
+            <span className={`text-[0.65rem] font-bold ${includeTikTok ? 'text-[#2563eb]' : 'text-gray-400'}`}>
               {includeTikTok ? 'ON' : 'OFF'}
             </span>
           </button>
@@ -335,7 +334,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <span className={`w-2 h-2 rounded-full ${includeYouTube ? 'bg-red-500' : 'bg-gray-300'}`}></span>
               YouTube Shorts
             </span>
-            <span className={`text-[0.65rem] font-bold ${includeYouTube ? 'text-[#7c3aed]' : 'text-gray-400'}`}>
+            <span className={`text-[0.65rem] font-bold ${includeYouTube ? 'text-[#2563eb]' : 'text-gray-400'}`}>
               {includeYouTube ? 'ON' : 'OFF'}
             </span>
           </button>
@@ -355,7 +354,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           step="5"
           value={minMatchThreshold}
           onChange={(e) => setMinMatchThreshold(Number(e.target.value))}
-          className="w-full accent-[#7c3aed] cursor-pointer h-1.5 bg-[#e9e6df] rounded-lg"
+          className="w-full accent-[#2563eb] cursor-pointer h-1.5 bg-[#e9e6df] rounded-lg"
         />
 
         <div className="pt-2 flex items-center justify-between">
@@ -364,21 +363,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
             type="checkbox"
             checked={stepByStepMode}
             onChange={(e) => setStepByStepMode(e.target.checked)}
-            className="w-3.5 h-3.5 accent-[#7c3aed] cursor-pointer"
+            className="w-3.5 h-3.5 accent-[#2563eb] cursor-pointer"
           />
         </div>
       </div>
 
-      {/* 5. Quota Banner from Variation 3 */}
-      <div className="quota-banner mt-auto bg-[#f5f3ff] p-5 sm:p-6 rounded-2xl border border-[#7c3aed]/10">
+      {/* 5. Quota Banner */}
+      <div className="quota-banner mt-auto bg-[#eff6ff] p-5 sm:p-6 rounded-2xl border border-[#2563eb]/10">
         <div className="flex items-center justify-between mb-1">
-          <h4 className="mono text-[#7c3aed] font-bold">Pipeline Capacity</h4>
+          <h4 className="mono text-[#2563eb] font-bold">Pipeline Capacity</h4>
           <span className="text-[0.62rem] font-mono text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded-full font-bold">
             100%
           </span>
         </div>
         <div className="quota-bar h-1.5 bg-black/5 rounded-full my-2.5 overflow-hidden">
-          <div className="quota-progress w-full h-full bg-[#7c3aed] rounded-full"></div>
+          <div className="quota-progress w-full h-full bg-[#2563eb] rounded-full"></div>
         </div>
         <p className="text-[0.72rem] text-[#666] leading-relaxed">
           100% Compliant quota across all multimodal discovery nodes (20+ Reels, 20+ Ads verified).

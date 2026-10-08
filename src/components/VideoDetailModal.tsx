@@ -121,7 +121,7 @@ export const VideoDetailModal: React.FC<VideoDetailModalProps> = ({
         <div className="w-full md:w-1/2 bg-black flex flex-col items-center justify-between relative overflow-hidden">
           {/* Top Overlays */}
           <div className="absolute top-3 left-3 right-3 z-20 flex items-center justify-between text-white">
-            <span className="px-3 py-1 bg-[#7c3aed] text-white backdrop-blur-md rounded-full text-xs font-mono font-bold shadow-xs">
+            <span className="px-3 py-1 bg-[#2563eb] text-white backdrop-blur-md rounded-full text-xs font-mono font-bold shadow-xs">
               {video.matchScore}% Match Confidence
             </span>
 
@@ -173,7 +173,7 @@ export const VideoDetailModal: React.FC<VideoDetailModalProps> = ({
             <div className="flex items-center gap-3">
               <button
                 onClick={togglePlay}
-                className="hover:text-purple-300 transition cursor-pointer"
+                className="hover:text-blue-300 transition cursor-pointer"
               >
                 {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
               </button>
@@ -213,14 +213,14 @@ export const VideoDetailModal: React.FC<VideoDetailModalProps> = ({
             <div className="flex items-start justify-between gap-4 mb-4 pb-4 border-b border-[rgba(0,0,0,0.06)]">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="mono text-[#7c3aed] font-bold">
+                  <span className="mono text-[#2563eb] font-bold">
                     @{video.author.handle}
                   </span>
                   {video.author.verified && (
                     <ShieldCheck className="w-3.5 h-3.5 text-sky-600" />
                   )}
                   {video.adMetadata && (
-                    <span className="px-2 py-0.5 bg-[#f5f3ff] text-[#7c3aed] text-[0.6rem] font-mono rounded-full font-bold border border-[#7c3aed]/20">
+                    <span className="px-2 py-0.5 bg-[#eff6ff] text-[#2563eb] text-[0.6rem] font-mono rounded-full font-bold border border-[#2563eb]/20">
                       Ad #{video.adMetadata.adId.slice(-4)}
                     </span>
                   )}
@@ -266,7 +266,7 @@ export const VideoDetailModal: React.FC<VideoDetailModalProps> = ({
                 onClick={() => setActiveTab('vision')}
                 className={`pb-2.5 transition-all cursor-pointer font-semibold ${
                   activeTab === 'vision'
-                    ? 'border-b-2 border-[#7c3aed] text-[#7c3aed]'
+                    ? 'border-b-2 border-[#2563eb] text-[#2563eb]'
                     : 'text-[#666] hover:text-[#1a1a1a]'
                 }`}
               >
@@ -276,7 +276,7 @@ export const VideoDetailModal: React.FC<VideoDetailModalProps> = ({
                 onClick={() => setActiveTab('hook')}
                 className={`pb-2.5 transition-all cursor-pointer font-semibold ${
                   activeTab === 'hook'
-                    ? 'border-b-2 border-[#7c3aed] text-[#7c3aed]'
+                    ? 'border-b-2 border-[#2563eb] text-[#2563eb]'
                     : 'text-[#666] hover:text-[#1a1a1a]'
                 }`}
               >
@@ -287,7 +287,7 @@ export const VideoDetailModal: React.FC<VideoDetailModalProps> = ({
                   onClick={() => setActiveTab('ad')}
                   className={`pb-2.5 transition-all cursor-pointer font-semibold ${
                     activeTab === 'ad'
-                      ? 'border-b-2 border-[#7c3aed] text-[#7c3aed]'
+                      ? 'border-b-2 border-[#2563eb] text-[#2563eb]'
                       : 'text-[#666] hover:text-[#1a1a1a]'
                   }`}
                 >
@@ -298,7 +298,7 @@ export const VideoDetailModal: React.FC<VideoDetailModalProps> = ({
                 onClick={() => setActiveTab('notes')}
                 className={`pb-2.5 transition-all cursor-pointer font-semibold ${
                   activeTab === 'notes'
-                    ? 'border-b-2 border-[#7c3aed] text-[#7c3aed]'
+                    ? 'border-b-2 border-[#2563eb] text-[#2563eb]'
                     : 'text-[#666] hover:text-[#1a1a1a]'
                 }`}
               >
@@ -363,7 +363,7 @@ export const VideoDetailModal: React.FC<VideoDetailModalProps> = ({
                 {/* Gemini AI Match Verdict */}
                 <div className="p-3.5 bg-white border border-[rgba(26,26,26,0.08)] rounded">
                   <div className="flex items-center gap-2 mb-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+                    <Sparkles className="w-3.5 h-3.5 text-[#2563eb]" />
                     <span className="label-mono">Gemini Multimodal Vision Analysis</span>
                   </div>
                   <p className="text-xs text-[rgba(26,26,26,0.8)] leading-relaxed mb-2.5">

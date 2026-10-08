@@ -74,12 +74,12 @@ export const VideoCard: React.FC<VideoCardProps> = ({
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
 
-          {/* Top-Right: Score Pill from Variation 3 */}
+          {/* Top-Right: Score Pill */}
           <div
             className={`absolute top-2.5 right-2.5 px-3 py-1 rounded-full mono text-[0.65rem] font-bold shadow-xs ${
               video.adMetadata?.daysActive && video.adMetadata.daysActive > 30
                 ? 'bg-emerald-600 text-white'
-                : 'bg-[#7c3aed] text-white'
+                : 'bg-[#2563eb] text-white'
             }`}
           >
             {video.adMetadata?.daysActive && video.adMetadata.daysActive > 30

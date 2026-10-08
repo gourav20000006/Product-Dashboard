@@ -124,11 +124,11 @@ export const AIBriefModal: React.FC<AIBriefModalProps> = ({
         {/* Header */}
         <div className="p-5 sm:p-6 border-b border-[rgba(0,0,0,0.06)] flex items-center justify-between bg-white">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-[#f5f3ff] flex items-center justify-center text-[#7c3aed]">
-              <Sparkles className="w-5 h-5 text-[#7c3aed]" />
+            <div className="w-9 h-9 rounded-full bg-[#eff6ff] flex items-center justify-center text-[#2563eb]">
+              <Sparkles className="w-5 h-5 text-[#2563eb]" />
             </div>
             <div>
-              <span className="mono text-[#7c3aed] font-bold">Gemini Creative Engine</span>
+              <span className="mono text-[#2563eb] font-bold">Gemini Creative Engine</span>
               <h2 className="font-newsreader text-2xl font-bold text-[#1a1a1a]">
                 AI UGC Video Script & Hook Brief
               </h2>

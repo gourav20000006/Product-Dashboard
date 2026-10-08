@@ -79,7 +79,7 @@ export const EvidenceModal: React.FC<EvidenceModalProps> = ({
         {/* Header */}
         <div className="p-5 sm:p-8 border-b border-[rgba(0,0,0,0.06)] flex items-center justify-between bg-white">
           <div>
-            <span className="mono text-[#7c3aed] font-bold">System Benchmarks</span>
+            <span className="mono text-[#2563eb] font-bold">System Benchmarks</span>
             <h2 className="font-newsreader text-2xl sm:text-3xl font-bold text-[#1a1a1a]">
               5 Tested Products Verification Evidence
             </h2>

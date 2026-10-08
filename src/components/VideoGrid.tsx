@@ -136,13 +136,13 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
             Discovered Creatives ({filteredVideos.length})
           </h3>
 
-          {/* Platform filters in accent purple */}
+          {/* Platform filters in accent blue */}
           <div className="flex items-center gap-3 text-xs sm:text-sm font-semibold">
             <button
               onClick={() => setSelectedPlatform('all')}
               className={`transition cursor-pointer ${
                 selectedPlatform === 'all'
-                  ? 'text-[#7c3aed] underline underline-offset-4 font-bold'
+                  ? 'text-[#2563eb] underline underline-offset-4 font-bold'
                   : 'text-[#666] hover:text-[#1a1a1a]'
               }`}
             >
@@ -152,7 +152,7 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
               onClick={() => setSelectedPlatform('instagram')}
               className={`transition cursor-pointer ${
                 selectedPlatform === 'instagram'
-                  ? 'text-[#7c3aed] underline underline-offset-4 font-bold'
+                  ? 'text-[#2563eb] underline underline-offset-4 font-bold'
                   : 'text-[#666] hover:text-[#1a1a1a]'
               }`}
             >
@@ -162,7 +162,7 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
               onClick={() => setSelectedPlatform('meta')}
               className={`transition cursor-pointer ${
                 selectedPlatform === 'meta'
-                  ? 'text-[#7c3aed] underline underline-offset-4 font-bold'
+                  ? 'text-[#2563eb] underline underline-offset-4 font-bold'
                   : 'text-[#666] hover:text-[#1a1a1a]'
               }`}
             >
@@ -172,7 +172,7 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
               onClick={() => setSelectedPlatform('tiktok')}
               className={`transition cursor-pointer ${
                 selectedPlatform === 'tiktok'
-                  ? 'text-[#7c3aed] underline underline-offset-4 font-bold'
+                  ? 'text-[#2563eb] underline underline-offset-4 font-bold'
                   : 'text-[#666] hover:text-[#1a1a1a]'
               }`}
             >
@@ -182,7 +182,7 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
               onClick={() => setSelectedPlatform('youtube')}
               className={`transition cursor-pointer ${
                 selectedPlatform === 'youtube'
-                  ? 'text-[#7c3aed] underline underline-offset-4 font-bold'
+                  ? 'text-[#2563eb] underline underline-offset-4 font-bold'
                   : 'text-[#666] hover:text-[#1a1a1a]'
               }`}
             >
@@ -197,7 +197,7 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
             onClick={() => setShowFilters(!showFilters)}
             className="btn btn-soft text-xs"
           >
-            <SlidersHorizontal className="w-3.5 h-3.5 text-[#7c3aed]" />
+            <SlidersHorizontal className="w-3.5 h-3.5 text-[#2563eb]" />
             <span>Filter & Sort</span>
           </button>
 
@@ -237,7 +237,7 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search caption or handle..."
-                className="w-full pl-8 pr-3 py-2 rounded-xl bg-[#f8f6f2] border border-[#eee] text-[#1a1a1a] outline-none focus:border-[#7c3aed]"
+                className="w-full pl-8 pr-3 py-2 rounded-xl bg-[#f8f6f2] border border-[#eee] text-[#1a1a1a] outline-none focus:border-[#2563eb]"
               />
             </div>
           </div>
@@ -247,7 +247,7 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
             <select
               value={scoreFilter}
               onChange={(e) => setScoreFilter(e.target.value as any)}
-              className="w-full p-2 rounded-xl bg-[#f8f6f2] border border-[#eee] text-[#1a1a1a] outline-none focus:border-[#7c3aed] cursor-pointer"
+              className="w-full p-2 rounded-xl bg-[#f8f6f2] border border-[#eee] text-[#1a1a1a] outline-none focus:border-[#2563eb] cursor-pointer"
             >
               <option value="all">All Confidence Scores</option>
               <option value="high">High Match (&gt;80%)</option>
@@ -260,7 +260,7 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="w-full p-2 rounded-xl bg-[#f8f6f2] border border-[#eee] text-[#1a1a1a] outline-none focus:border-[#7c3aed] cursor-pointer"
+              className="w-full p-2 rounded-xl bg-[#f8f6f2] border border-[#eee] text-[#1a1a1a] outline-none focus:border-[#2563eb] cursor-pointer"
             >
               <option value="score">Highest Match Score</option>
               <option value="views">Most Views</option>
