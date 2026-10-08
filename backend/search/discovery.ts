@@ -1,5 +1,7 @@
 import { config } from '../config.js';
 import type { SearchInput, ProductContext, DiscoveryResult, DiscoveryResponse } from './types.js';
+import { generateSearchPlan } from './ollama.js';
+import { fetchPageMetadata } from './crawler.js';
 
 function expandQueries(input: SearchInput): string[] {
   const base = (input.query || input.userPrompt || input.url || 'product').trim();
@@ -10,6 +12,7 @@ function expandQueries(input: SearchInput): string[] {
     terms.push(`${base} review`);
     terms.push(`${base} video`);
     terms.push(`${base} search`);
+    terms.push(`${base} ecommerce`);
   }
 
   if (input.url) {
@@ -25,10 +28,12 @@ function scoreResult(raw: Partial<DiscoveryResult>, query: string): number {
   const reason = (raw.reason || '').toLowerCase();
   const url = (raw.url || '').toLowerCase();
   const includesQuery = title.includes(q) || url.includes(q) || reason.includes(q);
+
   const semantic = raw.semanticScore ?? 0.75;
   const visual = raw.visualScore ?? 0.7;
   const exact = raw.exactMatchScore ?? 0.72;
-  return Math.min(99, Math.max(0, (semantic * 40 + visual * 30 + exact * 30 + (includesQuery ? 10 : 0))));
+  const score = semantic * 40 + visual * 30 + exact * 30 + (includesQuery ? 10 : 0);
+  return Math.min(99, Math.max(0, score));
 }
 
 async function searchSearxng(query: string): Promise<DiscoveryResult[]> {
@@ -71,22 +76,37 @@ export async function runDiscoveryPipeline(input: SearchInput, onStage?: (stage:
     'Preparing evidence',
   ];
 
-  const productContext = await (await import('./types.js')).buildProductContext(input);
   onStage?.(stages[0]);
+  const productContext = await (await import('./types.js')).buildProductContext(input);
 
-  const queries = expandQueries(input);
   onStage?.(stages[1]);
+  const baseQueries = await generateSearchPlan(input);
+  const queries = [...new Set([...expandQueries(input), ...baseQueries])].slice(0, 8);
 
+  onStage?.(stages[2]);
   const resultBuckets: DiscoveryResult[] = [];
+
   for (const query of queries) {
-    onStage?.(stages[2]);
+    onStage?.(stages[3]);
     const items = await searchSearxng(query);
-    resultBuckets.push(...items);
+    for (const item of items) {
+      if (item.url && item.url !== '#') {
+        try {
+          const metadata = await fetchPageMetadata(item.url);
+          resultBuckets.push({
+            ...item,
+            title: metadata.title || item.title,
+            thumbnail: metadata.image || item.thumbnail,
+            reason: metadata.description ? `Meta summary: ${metadata.description.slice(0, 140)}` : item.reason,
+          });
+        } catch {
+          resultBuckets.push(item);
+        }
+      }
+    }
   }
 
-  onStage?.(stages[3]);
   const deduped = Array.from(new Map(resultBuckets.map((item) => [item.url, item])).values());
-
   const ranked = deduped
     .map((item) => {
       const query = queries[0] || 'product';
@@ -110,16 +130,14 @@ export async function runDiscoveryPipeline(input: SearchInput, onStage?: (stage:
     description: productContext.description || 'AI-assisted product discovery',
   };
 
-  const explanations = [
-    'Open-source search provider is used to gather candidate result pages.',
-    'Results are ranked based on semantic relevance, product similarity, and observed evidence.',
-    'If a provider is unavailable, the system gracefully falls back to the next viable source.',
-  ];
-
   return {
     product,
     results: ranked,
-    explanations,
+    explanations: [
+      'SearXNG provides open-source search across web and product pages.',
+      'Candidate pages are crawled for metadata and summaries before ranking.',
+      'The system ranks by semantic relevance, visual match, and evidence strength.',
+    ],
     stage: stages[5],
   };
 }

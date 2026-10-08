@@ -41,18 +41,25 @@ export type DiscoveryResponse = {
 };
 
 export function buildProductContext(input: SearchInput): Promise<ProductContext> {
-  const keywordText = input.query || input.userPrompt || 'product discovery';
+  const keywordText = (input.query || input.userPrompt || 'product discovery').trim();
   const title = input.query || 'Discovered Product';
+  const extractedKeywords = keywordText
+    .split(/\s+/)
+    .map((term) => term.replace(/[^a-zA-Z0-9-]/g, '').trim())
+    .filter(Boolean)
+    .slice(0, 12);
 
   return Promise.resolve({
     title,
     brand: undefined,
-    description: `AI-assisted product discovery for: ${keywordText}`,
+    description: input.url
+      ? `AI-assisted discovery for product URL: ${input.url}`
+      : `AI-assisted product discovery for: ${keywordText}`,
     category: 'general product',
     price: undefined,
     image: input.imageUrl || input.imageBase64 || '',
     sourceUrl: input.url || '',
-    keywords: keywordText.split(/\s+/).filter(Boolean).slice(0, 12),
+    keywords: extractedKeywords.length ? extractedKeywords : ['product', 'discovery'],
     visualAttributes: ['visual similarity', 'semantic alignment', 'product style'],
   });
 }
