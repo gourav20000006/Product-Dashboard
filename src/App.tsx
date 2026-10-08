@@ -1,512 +1,165 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
+import React, { useMemo, useState } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
 
-import React, { useState, useEffect } from 'react';
-import {
-  SearchResultPackage,
-  VideoItem,
-  BenchmarkEvidence,
-  VideoCollection,
-  PipelineProgressState,
-} from './types.ts';
-import {
-  generateDiscoveryResults,
-  BENCHMARK_EVIDENCE,
-} from './data/mockData.ts';
-import { Header } from './components/Header.tsx';
-import { Sidebar } from './components/Sidebar.tsx';
-import { ProductCard } from './components/ProductCard.tsx';
-import { VideoGrid } from './components/VideoGrid.tsx';
-import { PipelineStepper } from './components/PipelineStepper.tsx';
-import { VideoDetailModal } from './components/VideoDetailModal.tsx';
-import { AIBriefModal } from './components/AIBriefModal.tsx';
-import { CollectionsModal } from './components/CollectionsModal.tsx';
-import { HistoryModal } from './components/HistoryModal.tsx';
-import { ShortlistModal } from './components/ShortlistModal.tsx';
-import { EvidenceModal } from './components/EvidenceModal.tsx';
+const baseUrl = '/api';
+
+type SearchResult = {
+  id: string;
+  title: string;
+  url: string;
+  source: string;
+  thumbnail?: string;
+  matchScore: number;
+  semanticScore: number;
+  visualScore: number;
+  exactMatchScore: number;
+  reason: string;
+};
 
 export default function App() {
-  // Current search result package (defaults to oversized graphic tee)
-  const [currentSearch, setCurrentSearch] = useState<SearchResultPackage>(() =>
-    generateDiscoveryResults('oversized graphic tee')
-  );
+  const [query, setQuery] = useState('oversized graphic tee');
+  const [url, setUrl] = useState('');
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState('Ready');
+  const [product, setProduct] = useState<any>(null);
+  const [results, setResults] = useState<SearchResult[]>([]);
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [pipelineProgress, setPipelineProgress] = useState<PipelineProgressState | null>(null);
+  const onImageSelect = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-  // Modals & Panels state
-  const [selectedVideoForDetail, setSelectedVideoForDetail] = useState<VideoItem | null>(null);
-  const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
-  const [isShortlistOpen, setIsShortlistOpen] = useState<boolean>(false);
-  const [isEvidenceOpen, setIsEvidenceOpen] = useState<boolean>(false);
-  const [isCollectionsOpen, setIsCollectionsOpen] = useState<boolean>(false);
-  const [isAIBriefOpen, setIsAIBriefOpen] = useState<boolean>(false);
-  const [isClearingHistory, setIsClearingHistory] = useState<boolean>(false);
-
-  // Persistent storage state
-  const [history, setHistory] = useState<SearchResultPackage[]>(() => {
-    try {
-      const stored = localStorage.getItem('pvd_history');
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  const [bookmarks, setBookmarks] = useState<VideoItem[]>(() => {
-    try {
-      const stored = localStorage.getItem('pvd_bookmarks');
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  const [collections, setCollections] = useState<VideoCollection[]>([
-    {
-      id: 'col_winners',
-      name: 'Scale Winners 🔥',
-      description: 'High-performing creatives active for 30+ days with >90% visual match',
-      createdAt: new Date().toISOString(),
-      color: '#1a1a1a',
-      videoIds: [],
-    },
-    {
-      id: 'col_hooks',
-      name: 'Hook Inspirations',
-      description: 'Top first 3-second visual and spoken hooks to replicate',
-      createdAt: new Date().toISOString(),
-      color: '#8b5cf6',
-      videoIds: [],
-    },
-    {
-      id: 'col_ugc',
-      name: 'UGC Creator References',
-      description: 'Raw handheld unboxings and styling try-on reels',
-      createdAt: new Date().toISOString(),
-      color: '#059669',
-      videoIds: [],
-    },
-  ]);
-
-  const [evidence, setEvidence] = useState<BenchmarkEvidence[]>(BENCHMARK_EVIDENCE);
-
-  // Initial load from server APIs
-  useEffect(() => {
-    loadServerData();
-  }, []);
-
-  const loadServerData = async () => {
-    try {
-      // 1. Fetch History
-      const hRes = await fetch('/api/history');
-      if (hRes.ok) {
-        const hJson = await hRes.json();
-        if (hJson.success && hJson.searches && hJson.searches.length > 0) {
-          setHistory(hJson.searches);
-          setCurrentSearch(hJson.searches[0]);
-        }
-      }
-
-      // 2. Fetch Bookmarks
-      const bRes = await fetch('/api/bookmarks');
-      if (bRes.ok) {
-        const bJson = await bRes.json();
-        if (bJson.success && bJson.bookmarks && bJson.bookmarks.length > 0) {
-          setBookmarks(bJson.bookmarks);
-        }
-      }
-
-      // 3. Fetch Collections
-      const cRes = await fetch('/api/collections');
-      if (cRes.ok) {
-        const cJson = await cRes.json();
-        if (cJson.success && cJson.collections) {
-          setCollections(cJson.collections);
-        }
-      }
-
-      // 4. Fetch Evidence
-      const eRes = await fetch('/api/test-evidence');
-      if (eRes.ok) {
-        const eJson = await eRes.json();
-        if (eJson.success && eJson.evidence) {
-          setEvidence(eJson.evidence);
-        }
-      }
-    } catch (err) {
-      console.warn('Server fetch non-fatal error:', err);
-    }
+    const reader = new FileReader();
+    reader.onload = () => setImagePreview(String(reader.result));
+    reader.readAsDataURL(file);
   };
 
-  // Execute Search Pipeline
-  const handleExecuteSearch = async (params: {
-    query?: string;
-    url?: string;
-    imageBase64?: string;
-    includeTikTok: boolean;
-    includeYouTube: boolean;
-    minMatchThreshold: number;
-    stepByStepMode?: boolean;
-  }) => {
+  const onSubmit = async (event: FormEvent) => {
+    event.preventDefault();
     setIsLoading(true);
-
-    const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+    setStatus('Understanding input...');
 
     try {
-      // If step-by-step diagnostic mode is enabled, display the visual stepper
-      if (params.stepByStepMode) {
-        setPipelineProgress({
-          step: 'resolving',
-          progressPercent: 12,
-          message: 'Resolving product target and fetching DOM imagery...',
-        });
-        await delay(500);
+      const payload = {
+        query,
+        url: url || undefined,
+        imageBase64: imagePreview || undefined,
+        userPrompt: query,
+      };
 
-        setPipelineProgress({
-          step: 'extracting',
-          progressPercent: 28,
-          message: 'Gemini Multimodal Vision: Analyzing silhouette, Pantone colors, and materials...',
-        });
-        await delay(600);
-
-        setPipelineProgress({
-          step: 'crawling_ig',
-          progressPercent: 48,
-          message: 'Instagram Graph & Reels Crawler: Fetching 20+ viral lookbook reels...',
-        });
-        await delay(600);
-
-        setPipelineProgress({
-          step: 'querying_meta',
-          progressPercent: 68,
-          message: 'Meta Ad Library API: Querying active commercial video campaigns (20+ quota)...',
-        });
-        await delay(600);
-
-        if (params.includeTikTok) {
-          setPipelineProgress({
-            step: 'scraping_tiktok',
-            progressPercent: 80,
-            message: 'TikTok Creative Center: Ingesting trending sound try-ons and UGC reviews...',
-          });
-          await delay(500);
-        }
-
-        setPipelineProgress({
-          step: 'hashing_dedup',
-          progressPercent: 88,
-          message: 'Perceptual Hashing: Filtering duplicate creative uploads and clone reels...',
-        });
-        await delay(500);
-
-        setPipelineProgress({
-          step: 'scoring_gemini',
-          progressPercent: 96,
-          message: `Applying Gemini Vision thresholding (>= ${params.minMatchThreshold}%)...`,
-        });
-        await delay(400);
-      } else {
-        setPipelineProgress({
-          step: 'resolving',
-          progressPercent: 35,
-          message: 'Executing full-stack AI discovery pipeline...',
-        });
-      }
-
-      // Try server endpoint
-      let searchData: SearchResultPackage | null = null;
-      try {
-        const response = await fetch('/api/search', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(params),
-        });
-
-        if (response.ok) {
-          const json = await response.json();
-          if (json.success && json.data) {
-            searchData = json.data;
-          }
-        }
-      } catch (e) {
-        console.warn('Falling back to client search engine:', e);
-      }
-
-      // Fallback to local client generator if server route failed
-      if (!searchData) {
-        searchData = generateDiscoveryResults(params.query || params.url || 'Oversized Tee', {
-          includeTikTok: params.includeTikTok,
-          includeYouTube: params.includeYouTube,
-          minMatchThreshold: params.minMatchThreshold,
-        });
-      }
-
-      // Apply threshold filter
-      if (params.minMatchThreshold > 0) {
-        searchData.results = searchData.results.filter(
-          (v) => v.matchScore >= params.minMatchThreshold
-        );
-      }
-
-      setCurrentSearch(searchData);
-
-      // Save into history
-      setHistory((prev) => {
-        const updated = [searchData!, ...prev.filter((p) => p.id !== searchData!.id)].slice(0, 15);
-        try {
-          localStorage.setItem('pvd_history', JSON.stringify(updated));
-        } catch {}
-        return updated;
+      const response = await fetch(`${baseUrl}/search`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
 
-      setPipelineProgress(null);
-    } catch (error) {
-      console.error('Search pipeline error:', error);
-      setPipelineProgress(null);
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Search request failed.');
+      }
+
+      setProduct(data.product || null);
+      setResults(data.results || []);
+      setStatus(data.stage || 'Results ready');
+    } catch (error: any) {
+      setStatus(error.message || 'Something went wrong');
+      setResults([]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Toggle Bookmark
-  const handleToggleBookmark = async (video: VideoItem) => {
-    try {
-      await fetch('/api/bookmark', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ video }),
-      });
-    } catch {}
-
-    setBookmarks((prev) => {
-      const exists = prev.some((b) => b.id === video.id);
-      const updated = exists ? prev.filter((b) => b.id !== video.id) : [video, ...prev];
-      try {
-        localStorage.setItem('pvd_bookmarks', JSON.stringify(updated));
-      } catch {}
-      return updated;
-    });
-  };
-
-  // Create Collection
-  const handleCreateCollection = async (name: string, description: string) => {
-    try {
-      const res = await fetch('/api/collections', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'create',
-          collection: { name, description },
-        }),
-      });
-      if (res.ok) {
-        const json = await res.json();
-        if (json.success && json.collections) {
-          setCollections(json.collections);
-          return;
-        }
-      }
-    } catch {}
-
-    const newCol: VideoCollection = {
-      id: `col_${Date.now()}`,
-      name,
-      description,
-      createdAt: new Date().toISOString(),
-      color: '#1a1a1a',
-      videoIds: [],
-    };
-    setCollections((prev) => [...prev, newCol]);
-  };
-
-  // Delete Collection
-  const handleDeleteCollection = async (id: string) => {
-    try {
-      await fetch('/api/collections', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'delete', collectionId: id }),
-      });
-    } catch {}
-    setCollections((prev) => prev.filter((c) => c.id !== id));
-  };
-
-  // Add / Remove video from collection
-  const handleToggleVideoInCollection = async (videoId: string, collectionId: string) => {
-    try {
-      await fetch('/api/collections', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'toggle-video',
-          collectionId,
-          videoId,
-        }),
-      });
-    } catch {}
-
-    setCollections((prev) =>
-      prev.map((c) => {
-        if (c.id === collectionId) {
-          const has = c.videoIds.includes(videoId);
-          return {
-            ...c,
-            videoIds: has ? c.videoIds.filter((id) => id !== videoId) : [...c.videoIds, videoId],
-          };
-        }
-        return c;
-      })
-    );
-  };
-
-  // Clear History
-  const handleClearHistory = async () => {
-    setIsClearingHistory(true);
-    try {
-      await fetch('/api/history', { method: 'DELETE' });
-    } catch {}
-    setHistory([]);
-    try {
-      localStorage.removeItem('pvd_history');
-    } catch {}
-    setIsClearingHistory(false);
-  };
-
-  // Update user notes and rating
-  const handleUpdateNotes = (videoId: string, notes: string, rating: number) => {
-    setCurrentSearch((prev) => ({
-      ...prev,
-      results: prev.results.map((v) =>
-        v.id === videoId ? { ...v, userNotes: notes, userRating: rating } : v
-      ),
-    }));
-    setBookmarks((prev) =>
-      prev.map((v) =>
-        v.id === videoId ? { ...v, userNotes: notes, userRating: rating } : v
-      )
-    );
-    if (selectedVideoForDetail && selectedVideoForDetail.id === videoId) {
-      setSelectedVideoForDetail((prev) =>
-        prev ? { ...prev, userNotes: notes, userRating: rating } : null
-      );
-    }
-  };
+  const summary = useMemo(() => {
+    if (!results.length) return 'No results yet';
+    return `${results.length} relevant candidate results`;
+  }, [results]);
 
   return (
-    <div className="min-h-screen bg-[#f8f6f2] text-[#1a1a1a] flex flex-col">
-      {/* Top Header */}
-      <Header
-        historyCount={history.length}
-        bookmarksCount={bookmarks.length}
-        collectionsCount={collections.length}
-        onOpenHistory={() => setIsHistoryOpen(true)}
-        onOpenShortlist={() => setIsShortlistOpen(true)}
-        onOpenEvidence={() => setIsEvidenceOpen(true)}
-        onOpenCollections={() => setIsCollectionsOpen(true)}
-        onOpenAIBrief={() => setIsAIBriefOpen(true)}
-      />
+    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 20px 60px', fontFamily: 'Inter, sans-serif', background: '#f5f5f3', minHeight: '100vh', color: '#111' }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, marginBottom: 28, flexWrap: 'wrap' }}>
+        <div>
+          <div style={{ fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', opacity: 0.7 }}>AI search platform</div>
+          <h1 style={{ margin: 0, fontSize: 36, lineHeight: 1.1 }}>Product Discovery Search</h1>
+        </div>
+        <div style={{ padding: '8px 12px', background: '#fff', borderRadius: 999, border: '1px solid #ddd', fontSize: 12 }}>{status}</div>
+      </header>
 
-      {/* Main Two-Column Layout from Variation 3 */}
-      <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[400px_1fr] gap-8 sm:gap-10 px-4 sm:px-10 pb-10 overflow-hidden">
-        {/* Left Control Sidebar */}
-        <Sidebar
-          onExecuteSearch={handleExecuteSearch}
-          isLoading={isLoading}
-          totalFilteredDuplicates={currentSearch.filteredDuplicatesCount}
-          currentReelCount={currentSearch.results.filter((v) => v.platform === 'instagram').length}
-          currentMetaCount={currentSearch.results.filter((v) => v.platform === 'meta').length}
-          currentTikTokCount={currentSearch.results.filter((v) => v.platform === 'tiktok').length}
-          currentYouTubeCount={currentSearch.results.filter((v) => v.platform === 'youtube').length}
-        />
+      <form onSubmit={onSubmit} style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 18, padding: 18, boxShadow: '0 10px 25px rgba(0,0,0,0.04)' }}>
+        <div style={{ display: 'grid', gap: 14 }}>
+          <label style={{ display: 'grid', gap: 8 }}>
+            <span style={{ fontWeight: 600 }}>Keyword / product query</span>
+            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="oversized graphic tee" style={{ padding: '14px 16px', border: '1px solid #d6d6d6', borderRadius: 12, fontSize: 16 }} />
+          </label>
 
-        {/* Right Dashboard Work Area */}
-        <main className="flex-1 overflow-y-auto pr-0 sm:pr-3">
-          {/* Real-time Pipeline Stepper */}
-          {pipelineProgress && <PipelineStepper progress={pipelineProgress} />}
+          <label style={{ display: 'grid', gap: 8 }}>
+            <span style={{ fontWeight: 600 }}>Product URL (optional)</span>
+            <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://example.com/product" style={{ padding: '14px 16px', border: '1px solid #d6d6d6', borderRadius: 12, fontSize: 16 }} />
+          </label>
 
-          {/* Product Hero Card */}
-          <ProductCard
-            product={currentSearch.product}
-            attributes={currentSearch.attributes}
-          />
+          <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontWeight: 600 }}>
+              <input type="file" accept="image/*" onChange={onImageSelect} />
+              Upload product image
+            </label>
+            {imagePreview && <img src={imagePreview} alt="Preview" style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 12 }} />}
+          </div>
 
-          {/* Video Discovery Grid & Filter Suite */}
-          <VideoGrid
-            currentSearch={currentSearch}
-            bookmarks={bookmarks}
-            onToggleBookmark={handleToggleBookmark}
-            onOpenDetail={(video) => setSelectedVideoForDetail(video)}
-            onOpenAIBrief={() => setIsAIBriefOpen(true)}
-            onAddToCollection={(videoId) => setIsCollectionsOpen(true)}
-          />
-        </main>
+          <button type="submit" disabled={isLoading} style={{ background: '#111', color: '#fff', border: 'none', borderRadius: 12, padding: '14px 18px', fontSize: 16, fontWeight: 700, cursor: isLoading ? 'wait' : 'pointer' }}>
+            {isLoading ? 'Searching...' : 'Run AI search'}
+          </button>
+        </div>
+      </form>
+
+      <div style={{ marginTop: 26, display: 'grid', gridTemplateColumns: '1.2fr 2fr', gap: 20 }}>
+        <aside style={{ background: '#fff', borderRadius: 18, border: '1px solid #e5e5e5', padding: 18 }}>
+          <div style={{ fontWeight: 700, marginBottom: 12 }}>Product context</div>
+          {product ? (
+            <div style={{ display: 'grid', gap: 8 }}>
+              <div><strong>Title:</strong> {product.title}</div>
+              <div><strong>Category:</strong> {product.category || 'Unknown'}</div>
+              <div><strong>Brand:</strong> {product.brand || 'Not detected'}</div>
+              <div><strong>Price:</strong> {product.price || 'Unknown'}</div>
+              <div><strong>Keywords:</strong> {product.keywords?.join(', ') || 'n/a'}</div>
+            </div>
+          ) : (
+            <div style={{ opacity: 0.7 }}>No product context yet. Run a search to populate it.</div>
+          )}
+        </aside>
+
+        <section style={{ background: '#fff', borderRadius: 18, border: '1px solid #e5e5e5', padding: 18 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, gap: 8, flexWrap: 'wrap' }}>
+            <h2 style={{ margin: 0 }}>Search results</h2>
+            <span style={{ fontSize: 12, opacity: 0.7 }}>{summary}</span>
+          </div>
+
+          {!results.length ? (
+            <div style={{ opacity: 0.7 }}>No candidate results yet.</div>
+          ) : (
+            <div style={{ display: 'grid', gap: 12 }}>
+              {results.map((result) => (
+                <article key={result.id} style={{ border: '1px solid #ebebeb', borderRadius: 14, padding: 14, display: 'grid', gap: 10 }}>
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'start' }}>
+                    {result.thumbnail ? <img src={result.thumbnail} alt={result.title} style={{ width: 86, height: 86, objectFit: 'cover', borderRadius: 12 }} /> : <div style={{ width: 86, height: 86, borderRadius: 12, background: '#f0f0f0', display: 'grid', placeItems: 'center' }}>IMG</div>}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700, fontSize: 18 }}>{result.title}</div>
+                      <div style={{ fontSize: 12, opacity: 0.7, marginTop: 4 }}>{result.source}</div>
+                      <a href={result.url} target="_blank" rel="noreferrer" style={{ fontSize: 12, overflowWrap: 'anywhere', color: '#0a66ff' }}>{result.url}</a>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    <span style={{ background: '#111', color: '#fff', borderRadius: 999, padding: '6px 10px', fontSize: 12 }}>Match {result.matchScore}</span>
+                    <span style={{ background: '#edf4ff', color: '#1a58d8', borderRadius: 999, padding: '6px 10px', fontSize: 12 }}>Sem {result.semanticScore}</span>
+                    <span style={{ background: '#ecfdf5', color: '#067647', borderRadius: 999, padding: '6px 10px', fontSize: 12 }}>Visual {result.visualScore}</span>
+                    <span style={{ background: '#fff7ed', color: '#b45309', borderRadius: 999, padding: '6px 10px', fontSize: 12 }}>Exact {result.exactMatchScore}</span>
+                  </div>
+                  <div style={{ fontSize: 13, lineHeight: 1.5 }}>{result.reason}</div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
       </div>
-
-      {/* Modals */}
-      {selectedVideoForDetail && (
-        <VideoDetailModal
-          video={selectedVideoForDetail}
-          product={currentSearch.product}
-          isBookmarked={bookmarks.some((b) => b.id === selectedVideoForDetail.id)}
-          collections={collections}
-          onClose={() => setSelectedVideoForDetail(null)}
-          onToggleBookmark={handleToggleBookmark}
-          onAddToCollection={handleToggleVideoInCollection}
-          onUpdateNotes={handleUpdateNotes}
-        />
-      )}
-
-      {isAIBriefOpen && (
-        <AIBriefModal
-          product={currentSearch.product}
-          winningVideos={currentSearch.results.filter((v) => v.matchScore >= 80)}
-          onClose={() => setIsAIBriefOpen(false)}
-        />
-      )}
-
-      {isCollectionsOpen && (
-        <CollectionsModal
-          collections={collections}
-          allVideos={currentSearch.results}
-          onClose={() => setIsCollectionsOpen(false)}
-          onCreateCollection={handleCreateCollection}
-          onDeleteCollection={handleDeleteCollection}
-          onRemoveVideo={(colId, vidId) => handleToggleVideoInCollection(vidId, colId)}
-          onOpenVideo={(v) => {
-            setSelectedVideoForDetail(v);
-            setIsCollectionsOpen(false);
-          }}
-        />
-      )}
-
-      {isHistoryOpen && (
-        <HistoryModal
-          searches={history}
-          onClose={() => setIsHistoryOpen(false)}
-          onSelectSearch={(s) => setCurrentSearch(s)}
-          onClearHistory={handleClearHistory}
-          isClearing={isClearingHistory}
-        />
-      )}
-
-      {isShortlistOpen && (
-        <ShortlistModal
-          bookmarks={bookmarks}
-          onClose={() => setIsShortlistOpen(false)}
-          onSelectVideo={(v) => setSelectedVideoForDetail(v)}
-          onRemoveBookmark={handleToggleBookmark}
-        />
-      )}
-
-      {isEvidenceOpen && (
-        <EvidenceModal
-          evidence={evidence}
-          onClose={() => setIsEvidenceOpen(false)}
-        />
-      )}
     </div>
   );
 }
